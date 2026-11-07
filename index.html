@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Halfies — draw half a creature with a stranger</title>
+  <meta name="description" content="You draw the top. A total stranger draws the bottom. 60 seconds later, meet your creature.">
+  <meta name="theme-color" content="#F4EFE6">
+  <meta property="og:title" content="Halfies">
+  <meta property="og:description" content="Draw half a creature. A stranger draws the other half.">
+  <meta property="og:url" content="https://factorylabs.app/halfies/">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <button id="mute" class="mute" aria-label="Toggle sound">🔊</button>
+
+  <main class="app">
+    <!-- HOME -->
+    <section id="home" class="screen active">
+      <h1 class="logo" aria-label="Halfies"><span class="me">Half</span><span class="them">ies</span></h1>
+      <p class="tag">You draw half a creature.<br>A total stranger draws the other half.</p>
+      <button id="go" class="big">Find my other half</button>
+      <p id="online" class="online">connecting…</p>
+      <div id="passport" class="passport" hidden>
+        <p id="passStats" class="pass-stats"></p>
+        <div id="passCards" class="pass-cards"></div>
+      </div>
+      <a class="credit" href="https://factorylabs.app">a FactoryLabs toy</a>
+    </section>
+
+    <!-- FINDING -->
+    <section id="finding" class="screen">
+      <div class="dots" aria-hidden="true"><span class="dot me"></span><span class="dot them"></span></div>
+      <p id="findText" class="find-text">Looking for your other half…</p>
+      <button id="cancel" class="link">Cancel</button>
+    </section>
+
+    <!-- CARD -->
+    <section id="card" class="screen">
+      <div class="flip" id="flip">
+        <div class="flip-inner">
+          <div class="face back"><span>?</span></div>
+          <div class="face front">
+            <p class="eyebrow">Today's activity</p>
+            <h2 class="card-title">Split<br>Creature</h2>
+            <svg class="card-icon" viewBox="0 0 120 120" aria-hidden="true">
+              <path d="M20 60a40 40 0 0 1 80 0z" fill="#FF5A4E" style="mix-blend-mode:multiply"/>
+              <path d="M20 60h80c0 22-18 40-40 40S20 82 20 60z" fill="#2E5BFF" style="mix-blend-mode:multiply"/>
+              <circle cx="46" cy="44" r="5" fill="#1D1B19"/><circle cx="74" cy="44" r="5" fill="#1D1B19"/>
+            </svg>
+            <p class="card-theme">Draw a creature that<br><b id="cardTheme">…</b></p>
+            <p class="card-role">You draw the <b id="cardRole">TOP</b> half</p>
+            <p class="card-partner" id="cardPartner"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section id="play" class="screen">
+      <header class="hud">
+        <div class="role-pill">You: <b id="hudRole">TOP</b></div>
+        <div class="timer" id="timer">
+          <svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar" id="timerBar" cx="24" cy="24" r="20"/></svg>
+          <span id="timerNum">60</span>
+        </div>
+      </header>
+      <p class="theme-line">A creature that <b id="playTheme">…</b></p>
+      <div class="board" id="board">
+        <canvas id="cv"></canvas>
+        <div class="flap" id="flap">
+          <span class="flap-label">their half 🙈</span>
+          <span class="flap-status" id="flapStatus"></span>
+        </div>
+        <div class="banner" id="banner" hidden></div>
+      </div>
+      <footer class="tools">
+        <button id="skip" class="tool small" aria-label="Skip this stranger" title="Skip this stranger">🚩</button>
+        <button id="undo" class="tool">↶ Undo</button>
+        <button id="done" class="tool primary">I'm done ✓</button>
+      </footer>
+    </section>
+
+    <!-- REVEAL -->
+    <section id="reveal" class="screen">
+      <button id="homeBtn" class="close" aria-label="Back to start">×</button>
+      <img id="postcard" class="postcard" alt="Your creature postcard">
+      <div class="five" id="five">
+        <button id="fiveBtn" class="five-btn" aria-label="High-five your other half">✋</button>
+        <p id="fiveText" class="five-text">High-five your other half!</p>
+      </div>
+      <div class="actions">
+        <button id="share" class="ghost-btn">Share</button>
+        <button id="again" class="big">Again!</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

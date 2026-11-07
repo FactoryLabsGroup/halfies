@@ -1,0 +1,12 @@
+{
+  "name": "halfies-tools",
+  "private": true,
+  "description": "Rebuilds vendor/trystero.js (the only dependency) — the site itself needs no build step.",
+  "scripts": {
+    "vendor": "esbuild entry.js --bundle --format=esm --minify --target=es2020 --outfile=../vendor/trystero.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.0",
+    "trystero": "0.26.0"
+  }
+}
