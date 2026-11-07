@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Halfies — draw half a creature with a stranger</title>
-  <meta name="description" content="You draw the top. A total stranger draws the bottom. 60 seconds later, meet your creature.">
+  <title>Halfies — make something weird with a stranger</title>
+  <meta name="description" content="Get matched with a total stranger for a 1-minute game: draw half a creature, read each other's minds, paint the same picture.">
   <meta name="theme-color" content="#F4EFE6">
   <meta property="og:title" content="Halfies">
-  <meta property="og:description" content="Draw half a creature. A stranger draws the other half.">
+  <meta property="og:description" content="Make something weird with a total stranger in 60 seconds.">
   <meta property="og:url" content="https://factorylabs.app/halfies/">
   <meta property="og:type" content="website">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -22,14 +22,16 @@
   <main class="app">
     <!-- HOME -->
     <section id="home" class="screen active">
-      <h1 class="logo" aria-label="Halfies"><span class="me">Half</span><span class="them">ies</span></h1>
-      <p class="tag">You draw half a creature.<br>A total stranger draws the other half.</p>
-      <button id="go" class="big">Find my other half</button>
-      <p id="online" class="online">connecting…</p>
-      <div id="passport" class="passport" hidden>
+      <div class="home-main">
+        <h1 class="logo" aria-label="Halfies"><span class="me">Half</span><span class="them">ies</span></h1>
+        <p class="tag">One minute. One total stranger.<br>Make something weird together.</p>
+        <button id="go" class="big">Find my other half</button>
+        <p id="online" class="online">connecting…</p>
+        <p class="ticker" aria-live="polite"></p>
         <p id="passStats" class="pass-stats"></p>
-        <div id="passCards" class="pass-cards"></div>
+        <div id="stamps" class="stamps"></div>
       </div>
+      <div id="zoo" class="zoo" aria-label="Your creature zoo"></div>
       <a class="credit" href="https://factorylabs.app">a FactoryLabs toy</a>
     </section>
 
@@ -38,62 +40,111 @@
       <div class="dots" aria-hidden="true"><span class="dot me"></span><span class="dot them"></span></div>
       <p id="findText" class="find-text">Looking for your other half…</p>
       <button id="cancel" class="link">Cancel</button>
+      <p class="ticker" aria-live="polite"></p>
     </section>
 
     <!-- CARD -->
     <section id="card" class="screen">
       <div class="flip" id="flip">
         <div class="flip-inner">
-          <div class="face back"><span>?</span></div>
+          <div class="face back"><span id="cardBack">?</span></div>
           <div class="face front">
-            <p class="eyebrow">Today's activity</p>
-            <h2 class="card-title">Split<br>Creature</h2>
-            <svg class="card-icon" viewBox="0 0 120 120" aria-hidden="true">
-              <path d="M20 60a40 40 0 0 1 80 0z" fill="#FF5A4E" style="mix-blend-mode:multiply"/>
-              <path d="M20 60h80c0 22-18 40-40 40S20 82 20 60z" fill="#2E5BFF" style="mix-blend-mode:multiply"/>
-              <circle cx="46" cy="44" r="5" fill="#1D1B19"/><circle cx="74" cy="44" r="5" fill="#1D1B19"/>
-            </svg>
-            <p class="card-theme">Draw a creature that<br><b id="cardTheme">…</b></p>
-            <p class="card-role">You draw the <b id="cardRole">TOP</b> half</p>
+            <p class="eyebrow">Your activity</p>
+            <h2 class="card-title" id="cardTitle"></h2>
+            <div class="card-icon" id="cardIcon"></div>
+            <p class="card-theme"><span id="cardRule"></span><br><b id="cardStrong"></b></p>
+            <p class="card-role" id="cardNote"></p>
             <p class="card-partner" id="cardPartner"></p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PLAY -->
+    <!-- PLAY: Split Creature -->
     <section id="play" class="screen">
       <header class="hud">
-        <div class="role-pill">You: <b id="hudRole">TOP</b></div>
-        <div class="timer" id="timer">
-          <svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar" id="timerBar" cx="24" cy="24" r="20"/></svg>
-          <span id="timerNum">60</span>
-        </div>
+        <div class="role-pill"><b id="hudRole">TOP</b> half</div>
+        <div class="reacts" data-phrases></div>
+        <div class="timer"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar tbar" cx="24" cy="24" r="20"/></svg><span class="tnum">60</span></div>
       </header>
       <p class="theme-line">A creature that <b id="playTheme">…</b></p>
       <div class="board" id="board">
         <canvas id="cv"></canvas>
         <div class="flap" id="flap">
+          <span class="pencil" id="pencil" aria-hidden="true">✏️</span>
           <span class="flap-label">their half 🙈</span>
           <span class="flap-status" id="flapStatus"></span>
         </div>
+        <div class="twist" id="twist" hidden></div>
+        <div class="bubble-say" id="bubble" hidden></div>
+        <div class="rarity-tag" id="rarityTag" hidden></div>
         <div class="banner" id="banner" hidden></div>
       </div>
       <footer class="tools">
-        <button id="skip" class="tool small" aria-label="Skip this stranger" title="Skip this stranger">🚩</button>
-        <button id="undo" class="tool">↶ Undo</button>
-        <button id="done" class="tool primary">I'm done ✓</button>
+        <button class="tool small skip" aria-label="Skip this stranger" title="Skip this stranger">🚩</button>
+        <div class="seg" role="group" aria-label="Tool">
+          <button id="toolPen" class="seg-btn" aria-pressed="true" aria-label="Pen">✏️</button>
+          <button id="toolEye" class="seg-btn" aria-pressed="false" aria-label="Googly eyes">👀</button>
+        </div>
+        <button id="undo" class="tool small" aria-label="Undo">↶</button>
+        <button id="done" class="tool primary">I’m done ✓</button>
+      </footer>
+    </section>
+
+    <!-- PLAY: Mind Meld -->
+    <section id="meld" class="screen">
+      <header class="hud">
+        <div class="role-pill" id="meldRound">Round 1/6</div>
+        <div class="reacts" data-phrases></div>
+        <div class="timer"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar tbar" cx="24" cy="24" r="20"/></svg><span class="tnum">20</span></div>
+      </header>
+      <div class="meld-stage">
+        <p class="meld-prompt" id="meldPrompt">Type any word!</p>
+        <ol class="meld-history" id="meldHistory"></ol>
+      </div>
+      <form class="meld-form" id="meldForm" autocomplete="off">
+        <input id="meldInput" maxlength="16" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="one word" aria-label="Your word">
+        <button id="meldSend" class="tool primary" type="submit">Send</button>
+      </form>
+      <p class="meld-status" id="meldStatus"></p>
+      <footer class="tools narrow">
+        <button class="tool small skip" type="button" aria-label="Skip this stranger" title="Skip this stranger">🚩</button>
+      </footer>
+    </section>
+
+    <!-- PLAY: Sync Grid -->
+    <section id="grid" class="screen">
+      <header class="hud">
+        <div class="role-pill">Paint it!</div>
+        <div class="reacts" data-phrases></div>
+        <div class="timer"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar tbar" cx="24" cy="24" r="20"/></svg><span class="tnum">40</span></div>
+      </header>
+      <p class="theme-line">Paint <b id="gridPrompt">…</b></p>
+      <div class="gridbox" id="gridBox"></div>
+      <p class="grid-status" id="gridStatus"></p>
+      <footer class="tools">
+        <button class="tool small skip" aria-label="Skip this stranger" title="Skip this stranger">🚩</button>
+        <button id="gridClear" class="tool">Clear</button>
+        <button id="gridDone" class="tool primary">I’m done ✓</button>
       </footer>
     </section>
 
     <!-- REVEAL -->
     <section id="reveal" class="screen">
       <button id="homeBtn" class="close" aria-label="Back to start">×</button>
-      <img id="postcard" class="postcard" alt="Your creature postcard">
+      <img id="postcard" class="postcard" alt="Your postcard">
       <div class="five" id="five">
         <button id="fiveBtn" class="five-btn" aria-label="High-five your other half">✋</button>
         <p id="fiveText" class="five-text">High-five your other half!</p>
       </div>
+      <div class="adopt" id="adopt" hidden>
+        <p id="adoptText" class="adopt-text"></p>
+        <div class="adopt-btns">
+          <button data-adopt="1" class="pill">🏠 Adopt</button>
+          <button data-adopt="0" class="pill">🚪 Nah</button>
+        </div>
+      </div>
+      <div class="reacts reveal-reacts" data-phrases></div>
       <div class="actions">
         <button id="share" class="ghost-btn">Share</button>
         <button id="again" class="big">Again!</button>
@@ -101,6 +152,8 @@
     </section>
   </main>
 
+  <div id="phrases" class="phrases" hidden></div>
+  <div id="floats" class="floats" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="confetti" class="confetti" aria-hidden="true"></div>
 

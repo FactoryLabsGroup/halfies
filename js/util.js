@@ -80,3 +80,51 @@ export function confetti(colors = ['#FF5A4E', '#2E5BFF', '#F2B705']) {
     setTimeout(() => p.remove(), 3500)
   }
 }
+
+export const TIMER_SVG = '<div class="timer"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="20"/><circle class="bar tbar" cx="24" cy="24" r="20"/></svg><span class="tnum"></span></div>'
+
+/** Drives a `.timer` ring inside `root`. Keeps time with setTimeout too, so background tabs still end on time. */
+export function countdown(root, ms, { onEnd, onSecond } = {}) {
+  const num = root.querySelector('.tnum')
+  const bar = root.querySelector('.tbar')
+  const box = root.querySelector('.timer')
+  const start = performance.now()
+  const end = start + ms
+  let raf = 0
+  let last = -1
+  let done = false
+  const stop = () => {
+    done = true
+    cancelAnimationFrame(raf)
+    clearTimeout(to)
+  }
+  const finish = () => {
+    if (done) return
+    stop()
+    num.textContent = '0'
+    onEnd?.()
+  }
+  const tick = () => {
+    if (done) return
+    const left = Math.max(0, end - performance.now())
+    const s = Math.ceil(left / 1000)
+    num.textContent = s
+    bar.style.strokeDashoffset = (125.66 * (1 - left / ms)).toFixed(2)
+    box.classList.toggle('hurry', s <= Math.min(10, ms / 6000))
+    if (s !== last) {
+      last = s
+      onSecond?.(s)
+    }
+    if (left <= 0) return finish()
+    raf = requestAnimationFrame(tick)
+  }
+  const to = setTimeout(finish, ms + 120)
+  tick()
+  return { stop, elapsed: () => performance.now() - start, left: () => Math.max(0, end - performance.now()) }
+}
+
+export const vibrate = (ms) => {
+  try {
+    navigator.vibrate?.(ms)
+  } catch {}
+}

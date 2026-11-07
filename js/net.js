@@ -8,7 +8,7 @@ const APP_ID = 'factorylabs.app/halfies'
 const LOBBY = 'lobby-v1'
 const INVITE_TIMEOUT = 4000
 
-export function createNet({ onCount, onMatch, onGame, onPartnerLeft }) {
+export function createNet({ onCount, onMatch, onGame, onPartnerLeft, onNews }) {
   const room = joinRoom({ appId: APP_ID, relayConfig: { warnOnRelayFailure: false } }, LOBBY)
   const waiting = new Set()
   const blocked = new Set()
@@ -26,6 +26,16 @@ export function createNet({ onCount, onMatch, onGame, onPartnerLeft }) {
   const inv = room.makeAction('inv')
   const ans = room.makeAction('ans')
   const game = room.makeAction('g')
+  const news = room.makeAction('nw')
+  const newsSeen = new Map()
+
+  // Lobby-wide "something just happened" events for the live ticker (rate-limited per peer).
+  news.onMessage = (d, { peerId }) => {
+    const now = Date.now()
+    if ((newsSeen.get(peerId) || 0) > now) return
+    newsSeen.set(peerId, now + 3000)
+    onNews?.(d)
+  }
 
   const lookingNow = () => state === 'waiting' || state === 'pending'
   const count = () => onCount(Object.keys(room.getPeers()).length + 1)
@@ -152,6 +162,7 @@ export function createNet({ onCount, onMatch, onGame, onPartnerLeft }) {
       }
     },
     isPending: () => state === 'pending',
+    news: (d) => news.send(d).catch(() => {}),
     debug: () => ({ selfId, state, partner, waiting: [...waiting], blocked: [...blocked], peers: Object.keys(room.getPeers()) }),
     send(d) {
       if (partner) game.send(d, { target: partner }).catch(() => {})

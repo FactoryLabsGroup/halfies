@@ -49,4 +49,16 @@ export const sfx = {
   five: () => tone(700, 0.08, { type: 'square', vol: 0.05 }),
   gold: () => [784, 988, 1175, 1568, 1976].forEach((f, i) => tone(f, 0.35, { delay: i * 0.07, vol: 0.08 })),
   sad: () => tone(330, 0.3, { slide: -120, vol: 0.06 }),
+  react: () => tone(880, 0.07, { type: 'sine', vol: 0.05, slide: 200 }),
+  whoosh: () => tone(200, 0.35, { type: 'sawtooth', vol: 0.03, slide: 900 }),
+  legend: () => [523, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.5, { delay: i * 0.06, vol: 0.07, type: 'sine' })),
+  rare: () => [659, 988, 1319].forEach((f, i) => tone(f, 0.3, { delay: i * 0.08, vol: 0.07 })),
+  /** Creature "speech": one blip per syllable-ish chunk of the text. */
+  babble(text, pitch = 1) {
+    const n = Math.min(14, Math.max(3, Math.round(text.replace(/[^a-z]/gi, '').length / 2.4)))
+    for (let i = 0; i < n; i++) {
+      const f = (260 + Math.random() * 260) * pitch
+      tone(f, 0.07, { type: 'square', vol: 0.035, slide: (Math.random() - 0.5) * 200, delay: i * 0.085 })
+    }
+  },
 }
